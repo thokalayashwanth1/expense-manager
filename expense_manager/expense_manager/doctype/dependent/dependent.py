@@ -19,6 +19,7 @@ def get_allocated(dependent, date):
 
 @frappe.whitelist()
 def get_pocket_money_balance(dependent, date=None):
+    frappe.has_permission("Dependent", doc=dependent, throw=True)
     date = getdate(date)
     user = frappe.db.get_value("Dependent", dependent, "user")
     allocated = get_allocated(dependent, date)
