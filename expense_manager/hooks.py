@@ -165,23 +165,11 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"expense_manager.tasks.all"
-# 	],
-# 	"daily": [
-# 		"expense_manager.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"expense_manager.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"expense_manager.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"expense_manager.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+    "monthly": [
+        "expense_manager.expense_manager.doctype.dependent.dependent.roll_over_all"
+    ]
+}
 
 # Testing
 # -------

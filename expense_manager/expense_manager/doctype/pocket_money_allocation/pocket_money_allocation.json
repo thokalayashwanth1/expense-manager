@@ -16,7 +16,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Dependent",
-   "options": "User",
+   "options": "Dependent",
    "reqd": 1
   },
   {
@@ -30,7 +30,7 @@
    "fieldname": "month",
    "fieldtype": "Select",
    "label": "month",
-   "options": "1-12"
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12"
   },
   {
    "fieldname": "year",
@@ -41,7 +41,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 20:56:07.553704",
+ "modified": "2026-11-19 21:43:42.378611",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Pocket Money Allocation",

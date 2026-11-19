@@ -13,8 +13,7 @@ class Expense(Document):
         budget = get_budget(self.spent_by, self.category, date)
         if not budget:
             return
-
-        spent = get_month_spend(self.spent_by, self.category, date)
+        spent = get_month_spend(self.spent_by, date, self.category)
         if spent > budget:
             notify_overspend(self.spent_by, self.category, spent, budget)
 
@@ -27,17 +26,17 @@ def get_budget(user, category, date):
     )
 
 
-def get_month_spend(user, category, date):
+def get_month_spend(user, date, category=None):
     expense = frappe.qb.DocType("Expense")
-    total = (
+    query = (
         frappe.qb.from_(expense)
         .select(Sum(expense.amount))
         .where(expense.spent_by == user)
-        .where(expense.category == category)
         .where(expense.expense_date.between(get_first_day(date), get_last_day(date)))
-    ).run()[0][0]
-    return total or 0
-
+    )
+    if category:
+        query = query.where(expense.category == category)
+    return query.run()[0][0] or 0
 
 def notify_overspend(user, category, spent, budget):
     frappe.get_doc(

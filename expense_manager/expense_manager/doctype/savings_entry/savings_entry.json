@@ -30,7 +30,7 @@
    "fieldname": "month",
    "fieldtype": "Select",
    "label": "month",
-   "options": "1-12"
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12"
   },
   {
    "fieldname": "year",
@@ -41,7 +41,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 20:59:24.967652",
+ "modified": "2026-11-19 21:44:11.869397",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Savings Entry",
