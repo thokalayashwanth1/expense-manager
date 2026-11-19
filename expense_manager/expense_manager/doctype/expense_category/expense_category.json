@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:category_name",
  "creation": "2026-11-19 20:01:05.124267",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -20,10 +21,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 20:02:40.290810",
+ "modified": "2026-11-19 20:48:03.390460",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Expense Category",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
