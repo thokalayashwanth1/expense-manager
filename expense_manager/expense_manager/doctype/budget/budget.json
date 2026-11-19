@@ -8,7 +8,8 @@
   "category",
   "amount",
   "month",
-  "year"
+  "year",
+  "user"
  ],
  "fields": [
   {
@@ -35,12 +36,20 @@
    "fieldname": "year",
    "fieldtype": "Int",
    "label": "year"
+  },
+  {
+   "default": "__user(current user)",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 20:08:08.388602",
+ "modified": "2026-11-19 21:12:58.443407",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Budget",
