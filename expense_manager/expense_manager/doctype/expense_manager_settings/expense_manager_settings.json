@@ -5,25 +5,31 @@
  "engine": "InnoDB",
  "field_order": [
   "telegram_bot_token_password",
-  "openai_api_key_password"
+  "openai_api_key_password",
+  "webhook_secret"
  ],
  "fields": [
   {
    "fieldname": "telegram_bot_token_password",
-   "fieldtype": "Data",
-   "label": "telegram_bot_token (Password)"
+   "fieldtype": "Password",
+   "label": "telegram_bot_token "
   },
   {
    "fieldname": "openai_api_key_password",
-   "fieldtype": "Data",
-   "label": "openai_api_key (Password)"
+   "fieldtype": "Password",
+   "label": "openai_api_key "
+  },
+  {
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "webhook_secret"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-19 23:59:35.019399",
+ "modified": "2026-11-20 10:13:44.617184",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Expense Manager Settings",
