@@ -1,13 +1,14 @@
 <script setup>
-import { Button, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
+import AppShell from "./components/AppShell.vue";
+import Portal from "./pages/Portal.vue";
 
-const user = createResource({ url: "frappe.auth.get_logged_user", auto: true });
+const profile = createResource({ url: "expense_manager.api.get_profile", auto: true });
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="text-xl font-semibold">Expense Manager</h1>
-    <p class="mt-2 text-gray-700">Signed in as {{ user.data }}</p>
-    <Button class="mt-4" variant="solid" @click="user.reload()">Reload</Button>
-  </div>
+  <template v-if="profile.data">
+    <Portal v-if="profile.data.dependent" :profile="profile.data" />
+    <AppShell v-else :profile="profile.data" />
+  </template>
 </template>
