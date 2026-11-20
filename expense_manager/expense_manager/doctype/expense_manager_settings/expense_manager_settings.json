@@ -17,7 +17,7 @@
   {
    "fieldname": "openai_api_key_password",
    "fieldtype": "Password",
-   "label": "openai_api_key "
+   "label": "gemini_api_key"
   },
   {
    "fieldname": "webhook_secret",
@@ -29,7 +29,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-20 10:13:44.617184",
+ "modified": "2026-11-20 10:36:23.706345",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Expense Manager Settings",

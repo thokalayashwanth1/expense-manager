@@ -1,3 +1,4 @@
+import base64
 import hmac
 import json
 
@@ -8,7 +9,7 @@ from frappe.utils import getdate, nowdate
 from expense_manager.expense_manager.doctype.expense.expense import get_budget, get_month_spend
 
 TELEGRAM_API = "https://api.telegram.org"
-OPENAI_API = "https://api.openai.com/v1"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
 EXTRACTION_PROMPT = (
     "Extract one expense from the user's text. Reply with JSON only: "
     '{"amount": number, "category": one of %s or null, "description": short string}.'
@@ -51,39 +52,37 @@ def download_voice(file_id):
     return audio.content
 
 
-def openai_headers():
-    return {"Authorization": f"Bearer {get_settings().get_password('openai_api_key')}"}
-
-
-def transcribe(audio):
+def generate(parts, **body):
     response = requests.post(
-        f"{OPENAI_API}/audio/transcriptions",
-        headers=openai_headers(),
-        files={"file": ("voice.ogg", audio, "audio/ogg")},
-        data={"model": "whisper-1"},
+        GEMINI_URL,
+        headers={"x-goog-api-key": get_settings().get_password("gemini_api_key")},
+        json={"contents": [{"parts": parts}], **body},
         timeout=60,
     )
     response.raise_for_status()
-    return response.json()["text"]
+    return response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+
+def transcribe(audio):
+    return generate(
+        [
+            {"text": "Transcribe this audio. Reply with the transcript only."},
+            {"inline_data": {"mime_type": "audio/ogg", "data": base64.b64encode(audio).decode()}},
+        ]
+    )
 
 
 def extract_expense(text):
     categories = frappe.get_all("Expense Category", pluck="name")
-    response = requests.post(
-        f"{OPENAI_API}/chat/completions",
-        headers=openai_headers(),
-        json={
-            "model": "gpt-4o-mini",
-            "response_format": {"type": "json_object"},
-            "messages": [
-                {"role": "system", "content": EXTRACTION_PROMPT % json.dumps(categories)},
-                {"role": "user", "content": text},
-            ],
-        },
-        timeout=30,
+    return json.loads(
+        generate(
+            [{"text": text}],
+            system_instruction={
+                "parts": [{"text": EXTRACTION_PROMPT % json.dumps(categories)}]
+            },
+            generationConfig={"responseMimeType": "application/json"},
+        )
     )
-    response.raise_for_status()
-    return json.loads(response.json()["choices"][0]["message"]["content"])
 
 
 def record_expense(user, expense):
