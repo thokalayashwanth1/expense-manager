@@ -4,14 +4,14 @@ import json
 
 import frappe
 import requests
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from expense_manager.expense_manager.doctype.expense.expense import get_budget, get_month_spend
+from expense_manager.expense_manager.doctype.expense.expense import create_expense, get_budget, get_month_spend
 
 TELEGRAM_API = "https://api.telegram.org"
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent"
 EXTRACTION_PROMPT = (
     "Extract one expense from the user's text. Reply with JSON only: "
     '{"amount": number, "category": one of %s or null, "description": short string}.'
@@ -72,7 +72,7 @@ def generate(parts, **body):
         GEMINI_URL,
         headers={"x-goog-api-key": get_settings().get_password("gemini_api_key")},
         json={"contents": [{"parts": parts}], **body},
-        timeout=60,
+        timeout=25,
     )
     response.raise_for_status()
     return response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
@@ -100,18 +100,6 @@ def extract_expense(text):
     )
 
 
-def record_expense(user, expense):
-    return frappe.get_doc(
-        {
-            "doctype": "Expense",
-            "amount": expense["amount"],
-            "category": expense["category"],
-            "description": expense["description"],
-            "expense_date": nowdate(),
-            "spent_by": user,
-            "source": "Telegram",
-        }
-    ).insert()
 
 
 def build_summary(expense):
@@ -129,7 +117,8 @@ def handle_voice(chat_id, user, voice):
     expense = extract_expense(text)
     if not expense.get("amount") or not expense.get("category"):
         return send_message(chat_id, f'I heard "{text}" but could not find an amount and category.')
-    send_message(chat_id, build_summary(record_expense(user, expense)))
+    doc = create_expense(user, expense["category"], expense["amount"], expense["description"], "Telegram")
+    send_message(chat_id, build_summary(doc))
 
 
 @frappe.whitelist(allow_guest=True)

@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import get_first_day, get_last_day, getdate
+from frappe.utils import get_first_day, get_last_day, getdate, nowdate
 
 
 class Expense(Document):
@@ -47,3 +47,16 @@ def notify_overspend(user, category, spent, budget):
             "subject": f"Over budget on {category}: spent {spent} of {budget}",
         }
     ).insert(ignore_permissions=True)
+
+def create_expense(user, category, amount, description, source):
+    return frappe.get_doc(
+        {
+            "doctype": "Expense",
+            "amount": amount,
+            "category": category,
+            "description": description,
+            "expense_date": nowdate(),
+            "spent_by": user,
+            "source": source,
+        }
+    ).insert()
