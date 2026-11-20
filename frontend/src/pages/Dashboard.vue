@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { Button, createResource } from "frappe-ui";
-import BarList from "../components/BarList.vue";
+import { BarChart, DonutChart } from "frappe-ui/charts";
 import { formatMoney } from "../format";
 
 const periods = [
@@ -52,8 +52,27 @@ const selectPeriod = (value) => {
       </div>
     </div>
     <div class="grid gap-4 md:grid-cols-2">
-      <BarList title="By category" :items="byCategory" />
-      <BarList title="By person" :items="byPerson" />
+      <div class="h-80 rounded-lg border p-4">
+        <DonutChart
+          title="By category"
+          :data="byCategory"
+          category="label"
+          value="total"
+          :format="formatMoney"
+          :loading="report.loading"
+        />
+      </div>
+      <div class="h-80 rounded-lg border p-4">
+        <BarChart
+          title="By person"
+          :data="byPerson"
+          x="label"
+          y="total"
+          horizontal
+          :y-axis="{ format: formatMoney }"
+          :loading="report.loading"
+        />
+      </div>
     </div>
   </div>
 </template>
