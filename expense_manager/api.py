@@ -1,5 +1,6 @@
 import frappe
 from frappe.query_builder.functions import Sum
+from expense_manager.expense_manager.doctype.expense.expense import get_month_spend
 from expense_manager.permissions import get_family
 
 from frappe.utils import (
@@ -65,3 +66,30 @@ def add_dependent(full_name, email, password):
             "parent_user": frappe.session.user,
         }
     ).insert().name
+
+@frappe.whitelist()
+def get_budget_status(date=None):
+    date = getdate(date)
+    user = frappe.session.user
+    budgets = frappe.get_list(
+        "Budget",
+        filters={"user": user, "month": str(date.month), "year": date.year},
+        fields=["name", "category", "amount"],
+    )
+    return [{**budget, "spent": get_month_spend(user, date, budget.category)} for budget in budgets]
+
+
+@frappe.whitelist()
+def set_budget(category, amount):
+    date = getdate()
+    filters = {
+        "user": frappe.session.user,
+        "category": category,
+        "month": str(date.month),
+        "year": date.year,
+    }
+    name = frappe.db.exists("Budget", filters)
+    budget = frappe.get_doc("Budget", name) if name else frappe.new_doc("Budget")
+    budget.update({**filters, "amount": amount})
+    budget.save()
+    return budget.name
