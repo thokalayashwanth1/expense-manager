@@ -6,6 +6,7 @@ from frappe.utils import (
     add_days,
     get_first_day,
     get_first_day_of_week,
+    get_fullname,
     get_last_day,
     getdate,
 )
@@ -30,3 +31,37 @@ def get_expense_report(period="month", date=None):
         .where(expense.expense_date.between(start, end))
         .groupby(expense.spent_by, expense.category)
     ).run(as_dict=True)
+
+
+
+@frappe.whitelist()
+def get_profile():
+    user = frappe.session.user
+    return {
+        "user": user,
+        "full_name": get_fullname(user),
+        "dependent": frappe.db.get_value("Dependent", {"user": user}, "name"),
+    }
+
+
+@frappe.whitelist()
+def add_dependent(full_name, email, password):
+    frappe.only_for("Individual")
+    user = frappe.get_doc(
+        {
+            "doctype": "User",
+            "email": email,
+            "first_name": full_name,
+            "new_password": password,
+            "send_welcome_email": 0,
+            "roles": [{"role": "Dependent"}],
+        }
+    ).insert(ignore_permissions=True)
+    return frappe.get_doc(
+        {
+            "doctype": "Dependent",
+            "dependent_name": full_name,
+            "user": user.name,
+            "parent_user": frappe.session.user,
+        }
+    ).insert().name
