@@ -1,0 +1,8 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div id="app"></div>
+<script>window.csrf_token = "{{ csrf_token }}";</script>
+<link rel="stylesheet" href="/assets/expense_manager/frontend/app.css">
+<script type="module" src="/assets/expense_manager/frontend/app.js"></script>
+{% endblock %}
