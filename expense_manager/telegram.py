@@ -5,6 +5,8 @@ import json
 import frappe
 import requests
 from frappe.utils import getdate, nowdate
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from expense_manager.expense_manager.doctype.expense.expense import get_budget, get_month_spend
 
@@ -52,8 +54,21 @@ def download_voice(file_id):
     return audio.content
 
 
+def gemini_session():
+    session = requests.Session()
+    retry = Retry(
+        total=4,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 503],
+        allowed_methods=["POST"],
+        raise_on_status=False,
+    )
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    return session
+
+
 def generate(parts, **body):
-    response = requests.post(
+    response = gemini_session().post(
         GEMINI_URL,
         headers={"x-goog-api-key": get_settings().get_password("gemini_api_key")},
         json={"contents": [{"parts": parts}], **body},
