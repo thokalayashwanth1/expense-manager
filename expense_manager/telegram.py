@@ -1,10 +1,11 @@
 import base64
 import hmac
 import json
+import secrets
 
 import frappe
 import requests
-from frappe.utils import getdate
+from frappe.utils import get_fullname, getdate
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -17,6 +18,7 @@ from expense_manager.expense_manager.doctype.expense.expense import (
 
 TELEGRAM_API = "https://api.telegram.org"
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent"
+LINK_CODE_TTL = 600
 EXTRACTION_PROMPT = (
     "Extract one expense from the user's text. Reply with JSON only: "
     '{"amount": number, "category": one of %s or null, "description": short string}.'
@@ -134,14 +136,53 @@ def webhook():
     frappe.enqueue(process_update, update=frappe.request.get_json(), queue="short")
 
 
+def link_code_key(code):
+    return f"telegram_link:{code}"
+
+
+def create_link_code(user):
+    code = f"{secrets.randbelow(10**6):06d}"
+    frappe.cache().set_value(link_code_key(code), user, expires_in_sec=LINK_CODE_TTL)
+    return code
+
+
+def fetch_bot_username():
+    token = get_settings().get_password("telegram_bot_token")
+    response = requests.get(f"{TELEGRAM_API}/bot{token}/getMe", timeout=10)
+    response.raise_for_status()
+    return response.json()["result"]["username"]
+
+
+def get_bot_username():
+    return frappe.cache().get_value("telegram_bot_username", generator=fetch_bot_username)
+
+
+def link_account(chat_id, code):
+    user = frappe.cache().get_value(link_code_key(code))
+    if not user:
+        return send_message(
+            chat_id, "That code is invalid or has expired. Generate a new one on the Telegram page."
+        )
+
+    frappe.cache().delete_value(link_code_key(code))
+    frappe.db.set_value("User", {"telegram_chat_id": str(chat_id)}, "telegram_chat_id", None)
+    frappe.db.set_value("User", user, "telegram_chat_id", str(chat_id))
+    send_message(chat_id, f"Linked to {get_fullname(user)}. Send me a voice note describing an expense.")
+
+
 def process_update(update):
     message = update.get("message", {})
     chat_id = message.get("chat", {}).get("id")
-    user = get_user_by_chat_id(chat_id)
+    command, _, argument = message.get("text", "").partition(" ")
+    if command in ("/link", "/start") and argument.strip():
+        return link_account(chat_id, argument.strip())
 
+    user = get_user_by_chat_id(chat_id)
     if not user:
         return send_message(
-            chat_id, f"Your chat ID is {chat_id}. Ask the admin to link it to your account."
+            chat_id,
+            "This chat is not linked yet. Open the Telegram page in the app, "
+            "generate a code and send it here as /link CODE.",
         )
 
     frappe.set_user(user)

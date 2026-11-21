@@ -8,6 +8,7 @@ from expense_manager.expense_manager.doctype.expense.expense import (
 )
 from expense_manager.expense_manager.doctype.dependent.dependent import get_pocket_money_balance
 from expense_manager.permissions import get_family
+from expense_manager.telegram import LINK_CODE_TTL, create_link_code, get_bot_username
 
 from frappe.utils import (
     add_days,
@@ -172,3 +173,19 @@ def get_monthly_trend(months=6):
         rows = get_expense_report("month", date)
         trend.append({"month": date.strftime("%b %Y"), "total": sum(row["total"] for row in rows)})
     return trend
+
+
+@frappe.whitelist()
+def get_telegram_status():
+    chat_id = frappe.db.get_value("User", frappe.session.user, "telegram_chat_id")
+    return {"linked": bool(chat_id), "bot": get_bot_username()}
+
+
+@frappe.whitelist()
+def generate_link_code():
+    return {"code": create_link_code(frappe.session.user), "expires_in": LINK_CODE_TTL}
+
+
+@frappe.whitelist()
+def unlink_telegram():
+    frappe.db.set_value("User", frappe.session.user, "telegram_chat_id", None)

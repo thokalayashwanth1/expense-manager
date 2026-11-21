@@ -8,6 +8,7 @@ const links = [
   { to: "/budgets", label: "Budgets" },
   { to: "/dependents", label: "Dependents" },
   { to: "/reports", label: "Reports" },
+  { to: "/telegram", label: "Telegram" },
 ];
 </script>
 
