@@ -4,6 +4,7 @@ defineProps({ profile: { type: Object, required: true } });
 const links = [
   { to: "/", label: "Dashboard" },
   { to: "/expenses", label: "Expenses" },
+  { to: "/categories", label: "Categories" },
   { to: "/budgets", label: "Budgets" },
   { to: "/dependents", label: "Dependents" },
 ];

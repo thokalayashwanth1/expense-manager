@@ -1,10 +1,11 @@
 <script setup>
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createListResource, createResource } from "frappe-ui";
 import { formatMoney } from "../format";
 
 const props = defineProps({ profile: { type: Object, required: true } });
 const form = reactive({ category: "", amount: "", description: "" });
+const error = ref("");
 
 const balance = createResource({
   url: "expense_manager.expense_manager.doctype.dependent.dependent.get_pocket_money_balance",
@@ -12,13 +13,7 @@ const balance = createResource({
   auto: true,
 });
 
-const categories = createListResource({
-  doctype: "Expense Category",
-  fields: ["name"],
-  orderBy: "name asc",
-  pageLength: 100,
-  auto: true,
-});
+const categories = createResource({ url: "expense_manager.api.get_allowed_categories", auto: true });
 
 const expenses = createListResource({
   doctype: "Expense",
@@ -37,8 +32,10 @@ const addExpense = createResource({
   url: "expense_manager.api.add_expense",
   onSuccess: () => {
     Object.assign(form, { category: "", amount: "", description: "" });
+    error.value = "";
     refresh();
   },
+  onError: (err) => (error.value = err.messages?.[0] || "Could not add the expense"),
 });
 
 const rollOver = createResource({
@@ -48,7 +45,7 @@ const rollOver = createResource({
 });
 
 const categoryOptions = computed(() =>
-  (categories.data || []).map((row) => ({ label: row.name, value: row.name })),
+  (categories.data || []).map((name) => ({ label: name, value: name })),
 );
 const submitExpense = () => addExpense.submit({ ...form });
 </script>
@@ -81,6 +78,7 @@ const submitExpense = () => addExpense.submit({ ...form });
       <FormControl v-model="form.category" type="select" :options="categoryOptions" placeholder="Category" />
       <FormControl v-model="form.amount" type="number" placeholder="Amount" />
       <FormControl v-model="form.description" type="text" placeholder="What was it for?" />
+      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
       <Button
         variant="solid"
         :disabled="!form.category || !form.amount"

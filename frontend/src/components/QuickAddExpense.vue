@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
-import { Button, FormControl, createListResource, createResource } from "frappe-ui";
+import { Button, FormControl, createResource } from "frappe-ui";
 
 const show = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["added"]);
@@ -8,13 +8,7 @@ const emit = defineEmits(["added"]);
 const form = reactive({ category: "", amount: "", description: "" });
 const error = ref("");
 
-const categories = createListResource({
-  doctype: "Expense Category",
-  fields: ["name"],
-  orderBy: "name asc",
-  pageLength: 100,
-  auto: true,
-});
+const categories = createResource({ url: "expense_manager.api.get_allowed_categories", auto: true });
 
 const addExpense = createResource({
   url: "expense_manager.api.add_expense",
@@ -28,7 +22,7 @@ const addExpense = createResource({
 });
 
 const categoryOptions = computed(() =>
-  (categories.data || []).map((row) => ({ label: row.name, value: row.name })),
+  (categories.data || []).map((name) => ({ label: name, value: name })),
 );
 const submit = () => addExpense.submit({ ...form });
 </script>
