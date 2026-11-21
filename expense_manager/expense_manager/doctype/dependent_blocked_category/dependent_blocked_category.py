@@ -1,5 +1,9 @@
+# Copyright (c) 2026, yashwanth and contributors
+# For license information, please see license.txt
+
+# import frappe
 from frappe.model.document import Document
 
 
 class DependentBlockedCategory(Document):
-    pass
+	pass

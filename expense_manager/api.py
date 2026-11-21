@@ -11,6 +11,7 @@ from expense_manager.permissions import get_family
 
 from frappe.utils import (
     add_days,
+    add_months,
     cint,
     get_first_day,
     get_first_day_of_week,
@@ -160,3 +161,14 @@ def set_dependent_categories(dependent, blocked):
     doc.set("blocked_categories", [{"category": name} for name in frappe.parse_json(blocked)])
     doc.save()
     return doc.name
+
+
+@frappe.whitelist()
+def get_monthly_trend(months=6):
+    today = getdate()
+    trend = []
+    for offset in range(cint(months) - 1, -1, -1):
+        date = add_months(today, -offset)
+        rows = get_expense_report("month", date)
+        trend.append({"month": date.strftime("%b %Y"), "total": sum(row["total"] for row in rows)})
+    return trend
