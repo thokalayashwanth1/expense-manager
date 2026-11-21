@@ -64,9 +64,9 @@ def add_dependent(full_name, email, password):
             "first_name": full_name,
             "new_password": password,
             "send_welcome_email": 0,
-            "roles": [{"role": "Dependent"}],
         }
     ).insert(ignore_permissions=True)
+    user.add_roles("Dependent")
     return frappe.get_doc(
         {
             "doctype": "Dependent",
