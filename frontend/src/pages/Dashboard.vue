@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { Button, createListResource, createResource } from "frappe-ui";
 import { BarChart, DonutChart } from "frappe-ui/charts";
+import QuickAddExpense from "../components/QuickAddExpense.vue";
 import StatCard from "../components/StatCard.vue";
 import { formatMoney } from "../format";
 
@@ -10,6 +11,7 @@ const periods = [
   { value: "month", label: "This month" },
 ];
 const period = ref("month");
+const showQuickAdd = ref(false);
 
 const report = createResource({
   url: "expense_manager.api.get_expense_report",
@@ -32,7 +34,7 @@ const grandTotal = computed(() => rows.value.reduce((sum, row) => sum + row.tota
 const sumOf = (items, key) => (items || []).reduce((sum, item) => sum + item[key], 0);
 const budgetTotal = computed(() => sumOf(budgets.data, "amount"));
 const budgetSpent = computed(() => sumOf(budgets.data, "spent"));
-const overBudget = computed(() => (budgets.data || []).filter((b) => b.spent > b.amount).length);
+const overspent = computed(() => (budgets.data || []).filter((budget) => budget.spent > budget.amount));
 
 const totalsBy = (key) => {
   const totals = {};
@@ -46,11 +48,18 @@ const selectPeriod = (value) => {
   period.value = value;
   report.submit({ period: value });
 };
+
+const refreshAll = () => {
+  report.reload();
+  budgets.reload();
+  dependents.reload();
+  recent.reload();
+};
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <h1 class="text-xl font-semibold">Dashboard</h1>
       <div class="flex gap-2">
         <Button
@@ -61,11 +70,27 @@ const selectPeriod = (value) => {
         >
           {{ option.label }}
         </Button>
+        <Button variant="solid" theme="green" @click="showQuickAdd = true">+ Quick add expense</Button>
       </div>
     </div>
 
+    <div
+      v-for="budget in overspent"
+      :key="budget.name"
+      role="alert"
+      class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+    >
+      <span class="font-semibold">Over budget:</span>
+      {{ budget.category }} is at {{ formatMoney(budget.spent) }} of {{ formatMoney(budget.amount) }}
+      ({{ formatMoney(budget.spent - budget.amount) }} over).
+    </div>
+
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard label="Total spent" :value="formatMoney(grandTotal)" :hint="`${rows.length} entries grouped`" />
+      <StatCard
+        label="Total spent"
+        :value="formatMoney(grandTotal)"
+        :hint="period === 'week' ? 'this week' : 'this month'"
+      />
       <StatCard
         label="Remaining budget"
         :value="formatMoney(budgetTotal - budgetSpent)"
@@ -73,9 +98,9 @@ const selectPeriod = (value) => {
       />
       <StatCard
         label="Over budget"
-        :value="overBudget"
+        :value="overspent.length"
         :hint="`of ${(budgets.data || []).length} budgets`"
-        :alert="overBudget > 0"
+        :alert="overspent.length > 0"
       />
       <StatCard label="Dependents" :value="(dependents.data || []).length" hint="on your plan" />
     </div>
@@ -105,7 +130,10 @@ const selectPeriod = (value) => {
     </div>
 
     <section class="rounded-lg border p-4">
-      <h2 class="mb-3 text-sm font-semibold text-gray-700">Recent expenses</h2>
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-gray-700">Recent expenses</h2>
+        <router-link to="/expenses" class="text-sm text-blue-600">View all</router-link>
+      </div>
       <p v-if="recent.data && !recent.data.length" class="text-sm text-gray-500">No expenses yet.</p>
       <ul class="divide-y">
         <li v-for="expense in recent.data" :key="expense.name" class="flex justify-between py-2 text-sm">
@@ -119,5 +147,7 @@ const selectPeriod = (value) => {
         </li>
       </ul>
     </section>
+
+    <QuickAddExpense v-model="showQuickAdd" @added="refreshAll" />
   </div>
 </template>
