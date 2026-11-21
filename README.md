@@ -75,11 +75,9 @@ npm install --legacy-peer-deps
 npm run build
 ```
 
-### 3. Create roles and the Telegram field
+### 3. Roles and the Telegram field
 
-- Create two Roles: `Individual` (Desk Access on) and `Dependent` (Desk Access off).
-- Add a Data field named `telegram_chat_id` to the User DocType (Customize Form), marked unique.
-- Give your own user the `Individual` role.
+The `Individual` and `Dependent` roles and the `telegram_chat_id` field on User are installed automatically as fixtures. Give your own user the `Individual` role.
 
 ### 4. Configure credentials
 
