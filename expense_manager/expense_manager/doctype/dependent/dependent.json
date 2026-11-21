@@ -7,7 +7,8 @@
  "field_order": [
   "dependent_name",
   "user",
-  "parent_user"
+  "parent_user",
+  "blocked_categories"
  ],
  "fields": [
   {
@@ -32,12 +33,18 @@
    "label": "Parent User",
    "options": "User",
    "reqd": 1
+  },
+  {
+   "fieldname": "blocked_categories",
+   "fieldtype": "Table",
+   "label": "Blocked Categories",
+   "options": "Dependent Blocked Category"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 22:26:43.392608",
+ "modified": "2026-11-21 17:35:00.000000",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Dependent",

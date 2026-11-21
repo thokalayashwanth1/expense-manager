@@ -8,7 +8,12 @@ from frappe.utils import getdate
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from expense_manager.expense_manager.doctype.expense.expense import create_expense, get_budget, get_month_spend
+from expense_manager.expense_manager.doctype.expense.expense import (
+    allowed_categories_for,
+    create_expense,
+    get_budget,
+    get_month_spend,
+)
 
 TELEGRAM_API = "https://api.telegram.org"
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent"
@@ -87,8 +92,8 @@ def transcribe(audio):
     )
 
 
-def extract_expense(text):
-    categories = frappe.get_all("Expense Category", pluck="name")
+def extract_expense(text, user):
+    categories = allowed_categories_for(user)
     return json.loads(
         generate(
             [{"text": text}],
@@ -114,7 +119,7 @@ def build_summary(expense):
 
 def handle_voice(chat_id, user, voice):
     text = transcribe(download_voice(voice["file_id"]))
-    expense = extract_expense(text)
+    expense = extract_expense(text, user)
     if not expense.get("amount") or not expense.get("category"):
         return send_message(chat_id, f'I heard "{text}" but could not find an amount and category.')
     doc = create_expense(user, expense["category"], expense["amount"], expense["description"], "Telegram")

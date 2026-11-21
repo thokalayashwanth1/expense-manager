@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "category_name"
+  "category_name",
+  "enabled"
  ],
  "fields": [
   {
@@ -16,12 +17,18 @@
    "label": "Category Name",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-19 22:24:07.932280",
+ "modified": "2026-11-21 17:30:00.000000",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Expense Category",

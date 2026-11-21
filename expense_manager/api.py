@@ -1,11 +1,17 @@
 import frappe
 from frappe.query_builder.functions import Sum
-from expense_manager.expense_manager.doctype.expense.expense import create_expense, get_month_spend
+from expense_manager.expense_manager.doctype.expense.expense import (
+    allowed_categories_for,
+    create_expense,
+    get_blocked_categories,
+    get_month_spend,
+)
 from expense_manager.expense_manager.doctype.dependent.dependent import get_pocket_money_balance
 from expense_manager.permissions import get_family
 
 from frappe.utils import (
     add_days,
+    cint,
     get_first_day,
     get_first_day_of_week,
     get_fullname,
@@ -103,7 +109,14 @@ def get_dependents():
         filters={"parent_user": frappe.session.user},
         fields=["name", "dependent_name", "user"],
     )
-    return [{**dependent, **get_pocket_money_balance(dependent.name)} for dependent in dependents]
+    return [
+        {
+            **dependent,
+            **get_pocket_money_balance(dependent.name),
+            "blocked": get_blocked_categories(dependent.user),
+        }
+        for dependent in dependents
+    ]
 
 
 @frappe.whitelist()
@@ -125,3 +138,25 @@ def set_pocket_money(dependent, amount):
 @frappe.whitelist()
 def add_expense(category, amount, description=None):
     return create_expense(frappe.session.user, category, amount, description, "Manual").name
+
+
+@frappe.whitelist()
+def get_allowed_categories():
+    return allowed_categories_for(frappe.session.user)
+
+
+@frappe.whitelist()
+def set_category_enabled(category, enabled):
+    doc = frappe.get_doc("Expense Category", category)
+    doc.enabled = cint(enabled)
+    doc.save()
+    return doc.enabled
+
+
+@frappe.whitelist()
+def set_dependent_categories(dependent, blocked):
+    frappe.has_permission("Dependent", "write", doc=dependent, throw=True)
+    doc = frappe.get_doc("Dependent", dependent)
+    doc.set("blocked_categories", [{"category": name} for name in frappe.parse_json(blocked)])
+    doc.save()
+    return doc.name
