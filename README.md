@@ -21,6 +21,13 @@ A Frappe app for managing personal and family expenses. Individuals set up categ
 - **Budgets:** create expense categories, set a monthly budget per category, and see spend against each budget, in red when over.
 - **Overspend alerts:** adding an expense checks the month's total for its category against the budget and sends a notification.
 - **Dependents:** create a dependent with their own login, allocate monthly pocket money, and see each dependent's remaining balance.
+- **Quick add:** a button on the dashboard opens a modal to record an expense without leaving the page.
+- **Overspend banner:** categories over budget are flagged at the top of the dashboard, with the amount over.
+- **Expenses page:** every expense, newest first, with who spent it and whether it came from Telegram. It refreshes every 10 seconds, so a voice note appears without a reload. It can be filtered by category.
+- **Categories:** archive a category instead of deleting it, so old expenses keep their history, and restore it later. Archived categories disappear from forms and from the bot.
+- **Allowed categories per dependent:** switch off categories a dependent should not use. The rule is enforced on the server, so it covers the portal and the Telegram bot.
+- **Reports:** a six month spending trend, breakdowns by category and person for a week or a month, budget utilisation, and a CSV download.
+- **Telegram page:** generate a one-time six digit code to link a Telegram account, see whether it is linked, and unlink it.
 
 ### Dependent (web portal, no Desk access)
 - See pocket money left this month, with allocated, spent and saved amounts.
@@ -30,7 +37,9 @@ A Frappe app for managing personal and family expenses. Individuals set up categ
 ### Telegram bot
 - Send a voice note such as "I spent 200 on Zomato". The bot transcribes it, extracts the amount, category and description, creates the expense, and replies with a summary and the remaining budget.
 - Only categories that already exist are matched. If nothing matches, the bot replies with what it heard instead of guessing.
-- Unlinked users receive their chat ID so they can be linked to an account.
+- **Account linking:** a user generates a six digit code on the Telegram page and sends `/link CODE` to the bot. Codes expire after 10 minutes and work once.
+- **Charging a dependent:** a guardian can say a dependent's name in the voice note ("Kid2 spent 100 on snacks") and the expense is charged to that dependent. Dependents can also link their own Telegram account.
+- The reply shows the budget used for the category, or the pocket money left when the expense belongs to a dependent.
 
 ## 3. Architecture
 
@@ -130,7 +139,7 @@ curl "https://api.telegram.org/bot<TOKEN>/setWebhook" \
   -d "url=<PUBLIC_URL>/api/method/expense_manager.telegram.webhook" \
   -d "secret_token=<WEBHOOK_SECRET>"
 ```
-Then send the bot a message. It replies with your chat ID. Save that in the `telegram_chat_id` field of your user so the bot knows who you are. The secret in `setWebhook` must equal `webhook_secret` in the settings, otherwise the webhook returns `403`.
+Then open the **Telegram** page in the app, generate a link code and send `/link CODE` to the bot. The secret in `setWebhook` must equal `webhook_secret` in the settings, otherwise the webhook returns `403`.
 
 ### 5. Open the app
 Visit `/expense-manager`. Individuals see the dashboard, budgets and dependents pages. Dependents are sent to their portal and have no Desk access.
@@ -147,6 +156,13 @@ Visit `/expense-manager`. Individuals see the dashboard, budgets and dependents 
 | `expense_manager.api.get_dependents` | Dependents with their pocket money balance |
 | `expense_manager.api.set_pocket_money` | Set this month's allowance for a dependent |
 | `expense_manager.api.add_expense` | Record an expense |
+| `expense_manager.api.get_allowed_categories` | Enabled categories this user may spend on |
+| `expense_manager.api.set_category_enabled` | Archive or restore a category |
+| `expense_manager.api.set_dependent_categories` | Switch categories off for a dependent |
+| `expense_manager.api.get_monthly_trend` | Monthly totals for the last six months |
+| `expense_manager.api.generate_link_code` | One-time code for linking Telegram |
+| `expense_manager.api.get_telegram_status` | Whether this user is linked, and the bot username |
+| `expense_manager.api.unlink_telegram` | Remove the Telegram link |
 | `...doctype.dependent.dependent.get_pocket_money_balance` | Allocated, spent, saved and remaining amounts |
 | `...doctype.dependent.dependent.roll_over_to_savings` | Move the remaining balance into savings |
 | `expense_manager.telegram.webhook` | Telegram webhook, protected by the secret header |
@@ -156,6 +172,7 @@ Visit `/expense-manager`. Individuals see the dashboard, budgets and dependents 
 - **No raw SQL:** queries use `frappe.qb`, `frappe.get_list` and `frappe.db.get_value`.
 - **One place for each rule:** month spend, expense creation, the family lookup and the pocket money balance each live in one function, shared by the web app, the Telegram bot and the scheduler.
 - **Idempotent rollover:** once a month is rolled over its balance is zero, so a repeat call, or the scheduler running twice, creates nothing.
+- **Archive, not delete:** categories are switched off with an `enabled` flag, because expenses link to them. The check lives in the Expense validation, so every entry point obeys it.
 - **Resilient AI calls:** Gemini requests retry on 429, 500 and 503 with backoff, with a timeout short enough to fail before the background job does.
 - **One AI vendor:** Gemini handles both transcription and extraction, so a single key covers the voice flow.
 
