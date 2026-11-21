@@ -134,7 +134,17 @@ Visit `/expense-manager` on your site. Individuals see the dashboard, budgets an
 
 ## Screenshots and demo
 
-Screenshots and the demo video will be added here.
+**Demo video:** _link coming soon_
+
+| Dashboard | Budgets |
+| --- | --- |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Budgets](docs/screenshots/budgets.png) |
+
+| Dependents | Dependent portal |
+| --- | --- |
+| ![Dependents](docs/screenshots/dependents.png) | ![Portal](docs/screenshots/portal.png) |
+
+![Telegram voice capture](docs/screenshots/telegram.png)
 
 ## License
 
