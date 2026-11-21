@@ -9,6 +9,7 @@ from frappe.utils import get_fullname, getdate
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from expense_manager.expense_manager.doctype.dependent.dependent import get_pocket_money_balance
 from expense_manager.expense_manager.doctype.expense.expense import (
     allowed_categories_for,
     create_expense,
@@ -21,7 +22,8 @@ GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-fla
 LINK_CODE_TTL = 600
 EXTRACTION_PROMPT = (
     "Extract one expense from the user's text. Reply with JSON only: "
-    '{"amount": number, "category": one of %s or null, "description": short string}.'
+    '{"amount": number, "category": one of %s or null, "description": short string, '
+    '"person": one of %s if the text clearly says the expense is for that person, otherwise null}.'
 )
 
 
@@ -94,37 +96,49 @@ def transcribe(audio):
     )
 
 
-def extract_expense(text, user):
-    categories = allowed_categories_for(user)
+def extract_expense(text, categories, people):
+    prompt = EXTRACTION_PROMPT % (json.dumps(categories), json.dumps(people))
     return json.loads(
         generate(
             [{"text": text}],
-            system_instruction={
-                "parts": [{"text": EXTRACTION_PROMPT % json.dumps(categories)}]
-            },
+            system_instruction={"parts": [{"text": prompt}]},
             generationConfig={"responseMimeType": "application/json"},
         )
     )
 
 
+def get_family_members(user):
+    members = frappe.get_all(
+        "Dependent", filters={"parent_user": user}, fields=["dependent_name", "user"]
+    )
+    return {member.dependent_name: member.user for member in members}
 
 
 def build_summary(expense):
     date = getdate(expense.expense_date)
-    summary = f"Recorded {expense.amount:g} under {expense.category}."
+    summary = f"Recorded {expense.amount:g} under {expense.category} for {get_fullname(expense.spent_by)}."
     budget = get_budget(expense.spent_by, expense.category, date)
     if budget:
         spent = get_month_spend(expense.spent_by, date, expense.category)
         summary += f" {expense.category} budget: {spent:g} of {budget:g} used this month."
+    dependent = frappe.db.get_value("Dependent", {"user": expense.spent_by})
+    if dependent:
+        summary += f" Pocket money left: {get_pocket_money_balance(dependent)['balance']:g}."
     return summary
 
 
 def handle_voice(chat_id, user, voice):
     text = transcribe(download_voice(voice["file_id"]))
-    expense = extract_expense(text, user)
+    members = get_family_members(user)
+    expense = extract_expense(text, allowed_categories_for(user), list(members))
     if not expense.get("amount") or not expense.get("category"):
         return send_message(chat_id, f'I heard "{text}" but could not find an amount and category.')
-    doc = create_expense(user, expense["category"], expense["amount"], expense["description"], "Telegram")
+
+    payer = members.get(expense.get("person"), user)
+    if expense["category"] not in allowed_categories_for(payer):
+        return send_message(chat_id, f"{expense['category']} is not available for {get_fullname(payer)}.")
+
+    doc = create_expense(payer, expense["category"], expense["amount"], expense["description"], "Telegram")
     send_message(chat_id, build_summary(doc))
 
 

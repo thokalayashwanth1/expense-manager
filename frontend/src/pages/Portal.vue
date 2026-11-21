@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createListResource, createResource } from "frappe-ui";
 import { formatMoney } from "../format";
+import TelegramLink from "../components/TelegramLink.vue";
 
 const props = defineProps({ profile: { type: Object, required: true } });
 const form = reactive({ category: "", amount: "", description: "" });
@@ -101,5 +102,7 @@ const submitExpense = () => addExpense.submit({ ...form });
         </li>
       </ul>
     </section>
+
+    <TelegramLink />
   </div>
 </template>
