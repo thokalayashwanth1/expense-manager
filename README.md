@@ -166,19 +166,14 @@ Visit `/expense-manager`. Individuals see the dashboard, budgets and dependents 
 ## 8. Screenshots
 
 ### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
 
 ### Budgets
-![Budgets](docs/screenshots/budgets.png)
 
 ### Dependents
-![Dependents](docs/screenshots/dependents.png)
 
 ### Dependent portal
-![Dependent portal](docs/screenshots/portal.png)
 
 ### Telegram voice capture
-![Telegram voice capture](docs/screenshots/telegram.png)
 
 ## 9. Known Limitations and Deferred Work
 
