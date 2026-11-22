@@ -78,6 +78,46 @@ A Frappe app for managing personal and family expenses. Individuals set up categ
 
 **Access control:** the `Individual` role has Desk access. The `Dependent` role has none. Permission query conditions limit every DocType to its owner's records, so a dependent only reads their own data and an individual reads their own and their dependents'.
 
+### Telegram Bot Message-Handling Flow
+
+```mermaid
+flowchart TD
+    A["Telegram sends an update<br/>POST /api/method/expense_manager.telegram.webhook"] --> B{"Secret header<br/>matches?"}
+    B -- No --> B1["403 Forbidden"]
+    B -- Yes --> C["Queue a background job<br/>and return 200 to Telegram"]
+    C --> D{"/link or /start<br/>with a code?"}
+    D -- Yes --> E{"Code valid and<br/>not expired?"}
+    E -- No --> E1["Reply: invalid or expired code"]
+    E -- Yes --> E2["Consume the code and link<br/>the chat ID to the user"] --> E3["Reply: Linked to the user"]
+    D -- No --> F{"Chat ID linked<br/>to a user?"}
+    F -- No --> F1["Reply: generate a code on<br/>the Telegram page"]
+    F -- Yes --> G["Continue as the linked user"]
+    G --> H{"Voice note?"}
+    H -- No --> H1["Reply: send a voice note"]
+    H -- Yes --> I["Download the audio from Telegram"]
+    I --> J["Transcribe with Gemini"]
+    J --> K["Extract amount, category, description<br/>and person with Gemini"]
+    K --> L{"Amount and category<br/>found?"}
+    L -- No --> L1["Reply with what was heard,<br/>no expense is created"]
+    L -- Yes --> M["Choose who pays: the named<br/>dependent or the sender"]
+    M --> N{"Category allowed<br/>for that person?"}
+    N -- No --> N1["Reply: category not available"]
+    N -- Yes --> O["Create the expense<br/>validation, budget check, alert"]
+    O --> P["Reply with a summary:<br/>budget used or pocket money left"]
+```
+
+| Situation | What the bot does |
+| --- | --- |
+| Request without the correct secret | Rejects it with `403` and does nothing else |
+| `/link CODE` with a valid code | Links the chat to the account, then confirms. The code cannot be used again |
+| `/link CODE` with a wrong or expired code | Asks the user to generate a new one on the Telegram page |
+| Message from an unlinked chat | Explains how to link the account |
+| Text message from a linked chat | Reminds the user to send a voice note |
+| Voice note with no clear amount or category | Replies with what it heard and creates nothing |
+| Voice note naming a dependent | Charges the expense to that dependent. Their category switches and budgets apply |
+| Category archived or switched off for the payer | Refuses with a message instead of guessing another category |
+| Any failure while processing, such as an API timeout | Logs the error and replies "Could not process that voice note" |
+
 ### Project structure
 
 ```
