@@ -146,7 +146,7 @@ A working Frappe v15 bench (Bench CLI, Python 3.12, MariaDB, Redis, Node.js 20+)
 
 ### 1. Install the app
 ```bash
-bench get-app https://github.com/thokalayashwanth1/expense-manager --branch develop
+bench get-app https://github.com/thokalayashwanth1/expense-manager --branch main
 bench --site <your-site> install-app expense_manager
 bench --site <your-site> migrate
 ```
