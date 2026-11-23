@@ -112,6 +112,7 @@ const refreshAll = () => {
           :data="byCategory"
           category="label"
           value="total"
+          :max-slices="7"
           :format="formatMoney"
           :loading="report.loading"
         />
