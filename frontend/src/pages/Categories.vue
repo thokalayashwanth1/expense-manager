@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { Button, FormControl, createListResource, createResource } from "frappe-ui";
+import { createAction } from "../api";
 
 const newCategory = ref("");
 
@@ -12,7 +13,8 @@ const categories = createListResource({
   auto: true,
 });
 
-const setEnabled = createResource({
+const setEnabled = createAction({
+  success: "Category updated",
   url: "expense_manager.api.set_category_enabled",
   onSuccess: () => categories.reload(),
 });

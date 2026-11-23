@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onUnmounted, ref, watch } from "vue";
 import { Button, createResource } from "frappe-ui";
+import { createAction } from "../api";
 
 const code = ref("");
 const secondsLeft = ref(0);
@@ -14,7 +15,7 @@ const stopCountdown = () => {
   code.value = "";
 };
 
-const generate = createResource({
+const generate = createAction({
   url: "expense_manager.api.generate_link_code",
   onSuccess: (data) => {
     clearInterval(timer);
@@ -28,7 +29,8 @@ const generate = createResource({
   },
 });
 
-const unlink = createResource({
+const unlink = createAction({
+  success: "Telegram unlinked",
   url: "expense_manager.api.unlink_telegram",
   onSuccess: () => status.reload(),
 });

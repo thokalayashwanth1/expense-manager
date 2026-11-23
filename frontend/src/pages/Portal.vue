@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createListResource, createResource } from "frappe-ui";
+import { createAction } from "../api";
 import { formatMoney } from "../format";
 import TelegramLink from "../components/TelegramLink.vue";
 
@@ -29,7 +30,8 @@ const refresh = () => {
   expenses.reload();
 };
 
-const addExpense = createResource({
+const addExpense = createAction({
+  success: "Expense added",
   url: "expense_manager.api.add_expense",
   onSuccess: () => {
     Object.assign(form, { category: "", amount: "", description: "" });
@@ -39,7 +41,8 @@ const addExpense = createResource({
   onError: (err) => (error.value = err.messages?.[0] || "Could not add the expense"),
 });
 
-const rollOver = createResource({
+const rollOver = createAction({
+  success: "Moved to savings",
   url: "expense_manager.expense_manager.doctype.dependent.dependent.roll_over_to_savings",
   params: { dependent: props.profile.dependent },
   onSuccess: refresh,

@@ -2,7 +2,8 @@
 import { computed, ref } from "vue";
 import { Button, createResource } from "frappe-ui";
 import { BarChart } from "frappe-ui/charts";
-import { formatMoney } from "../format";
+import BudgetBar from "../components/BudgetBar.vue";
+import { formatMoney, totalsBy } from "../format";
 
 const periods = [
   { value: "week", label: "This week" },
@@ -21,22 +22,14 @@ const budgets = createResource({ url: "expense_manager.api.get_budget_status", a
 const rows = computed(() => report.data || []);
 const grandTotal = computed(() => rows.value.reduce((sum, row) => sum + row.total, 0));
 
-const totalsBy = (key) => {
-  const totals = {};
-  for (const row of rows.value) totals[row[key]] = (totals[row[key]] || 0) + row.total;
-  return Object.entries(totals)
-    .map(([label, total]) => ({ label, total }))
-    .sort((a, b) => b.total - a.total);
-};
-const byCategory = computed(() => totalsBy("category"));
-const byPerson = computed(() => totalsBy("spent_by"));
+const byCategory = computed(() => totalsBy(rows.value, "category"));
+const byPerson = computed(() => totalsBy(rows.value, "spent_by"));
 
 const selectPeriod = (value) => {
   period.value = value;
   report.submit({ period: value });
 };
 
-const percentUsed = (budget) => Math.min((budget.spent / budget.amount) * 100, 100);
 
 const downloadCsv = () => {
   const lines = ["person,category,total", ...rows.value.map((row) => `${row.spent_by},${row.category},${row.total}`)];
@@ -111,22 +104,7 @@ const downloadCsv = () => {
       <h2 class="mb-3 text-sm font-semibold text-gray-700">Budget utilisation this month</h2>
       <p v-if="budgets.data && !budgets.data.length" class="text-sm text-gray-500">No budgets set.</p>
       <ul class="space-y-4">
-        <li v-for="budget in budgets.data" :key="budget.name">
-          <div class="flex justify-between text-sm">
-            <span>{{ budget.category }}</span>
-            <span :class="budget.spent > budget.amount ? 'font-medium text-red-600' : ''">
-              {{ Math.round((budget.spent / budget.amount) * 100) }}% ·
-              {{ formatMoney(budget.spent) }} of {{ formatMoney(budget.amount) }}
-            </span>
-          </div>
-          <div class="mt-1 h-2 rounded bg-gray-100">
-            <div
-              class="h-2 rounded"
-              :class="budget.spent > budget.amount ? 'bg-red-500' : 'bg-gray-900'"
-              :style="{ width: `${percentUsed(budget)}%` }"
-            />
-          </div>
-        </li>
+        <li v-for="budget in budgets.data" :key="budget.name"><BudgetBar :budget="budget" /></li>
       </ul>
     </section>
   </div>

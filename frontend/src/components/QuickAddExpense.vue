@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import { createAction } from "../api";
 
 const show = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["added"]);
@@ -10,7 +11,8 @@ const error = ref("");
 
 const categories = createResource({ url: "expense_manager.api.get_allowed_categories", auto: true });
 
-const addExpense = createResource({
+const addExpense = createAction({
+  success: "Expense added",
   url: "expense_manager.api.add_expense",
   onSuccess: () => {
     Object.assign(form, { category: "", amount: "", description: "" });

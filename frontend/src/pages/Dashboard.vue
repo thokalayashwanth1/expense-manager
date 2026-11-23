@@ -4,7 +4,7 @@ import { Button, createListResource, createResource } from "frappe-ui";
 import { BarChart, DonutChart } from "frappe-ui/charts";
 import QuickAddExpense from "../components/QuickAddExpense.vue";
 import StatCard from "../components/StatCard.vue";
-import { formatMoney } from "../format";
+import { formatMoney, totalsBy } from "../format";
 
 const periods = [
   { value: "week", label: "This week" },
@@ -36,13 +36,8 @@ const budgetTotal = computed(() => sumOf(budgets.data, "amount"));
 const budgetSpent = computed(() => sumOf(budgets.data, "spent"));
 const overspent = computed(() => (budgets.data || []).filter((budget) => budget.spent > budget.amount));
 
-const totalsBy = (key) => {
-  const totals = {};
-  for (const row of rows.value) totals[row[key]] = (totals[row[key]] || 0) + row.total;
-  return Object.entries(totals).map(([label, total]) => ({ label, total }));
-};
-const byCategory = computed(() => totalsBy("category"));
-const byPerson = computed(() => totalsBy("spent_by"));
+const byCategory = computed(() => totalsBy(rows.value, "category"));
+const byPerson = computed(() => totalsBy(rows.value, "spent_by"));
 
 const selectPeriod = (value) => {
   period.value = value;

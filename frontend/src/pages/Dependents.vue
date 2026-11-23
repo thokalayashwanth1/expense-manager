@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
+import { createAction } from "../api";
 import { formatMoney } from "../format";
 
 const form = reactive({ full_name: "", email: "", password: "" });
@@ -11,7 +12,8 @@ const openCategories = ref("");
 const dependents = createResource({ url: "expense_manager.api.get_dependents", auto: true });
 const categories = createResource({ url: "expense_manager.api.get_allowed_categories", auto: true });
 
-const addDependent = createResource({
+const addDependent = createAction({
+  success: "Dependent added",
   url: "expense_manager.api.add_dependent",
   onSuccess: () => {
     Object.assign(form, { full_name: "", email: "", password: "" });
@@ -21,12 +23,14 @@ const addDependent = createResource({
   onError: (err) => (error.value = err.messages?.[0] || "Could not add the dependent"),
 });
 
-const setPocketMoney = createResource({
+const setPocketMoney = createAction({
+  success: "Pocket money updated",
   url: "expense_manager.api.set_pocket_money",
   onSuccess: () => dependents.reload(),
 });
 
-const saveBlocked = createResource({
+const saveBlocked = createAction({
+  success: "Categories updated",
   url: "expense_manager.api.set_dependent_categories",
   onSuccess: () => dependents.reload(),
 });
