@@ -10,13 +10,12 @@ class Dependent(Document):
 
 
 def get_month_amount(doctype, dependent, date):
-    return (
-        frappe.db.get_value(
+    return sum(
+        frappe.get_all(
             doctype,
-            {"dependent": dependent, "month": str(date.month), "year": date.year},
-            "amount",
+            filters={"dependent": dependent, "month": str(date.month), "year": date.year},
+            pluck="amount",
         )
-        or 0
     )
 
 
