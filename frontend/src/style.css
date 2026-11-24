@@ -57,3 +57,8 @@ body {
 .web-footer {
   display: none;
 }
+
+.sticky-top,
+body > header {
+  display: none;
+}

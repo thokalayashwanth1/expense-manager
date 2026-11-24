@@ -142,6 +142,7 @@ permission_query_conditions = {
     "Dependent": "expense_manager.permissions.dependent_query",
     "Pocket Money Allocation": "expense_manager.permissions.allocation_query",
     "Savings Entry": "expense_manager.permissions.savings_query",
+    "Budget": "expense_manager.permissions.budget_query",
 }
 
 
@@ -261,3 +262,7 @@ fixtures = [
     {"doctype": "Role", "filters": [["name", "in", ["Individual", "Dependent"]]]},
     {"doctype": "Custom Field", "filters": [["name", "=", "User-telegram_chat_id"]]},
 ]
+
+has_permission = {
+    "Dependent": "expense_manager.permissions.dependent_has_permission",
+}

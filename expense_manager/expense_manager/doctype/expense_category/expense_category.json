@@ -5,9 +5,16 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "category_name",
   "enabled"
  ],
  "fields": [
+  {
+   "fieldname": "category_name",
+   "fieldtype": "Data",
+   "label": "Category Name",
+   "reqd": 1
+  },
   {
    "default": "1",
    "fieldname": "enabled",
@@ -18,7 +25,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-21 17:41:47.963384",
+ "modified": "2026-11-24 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Expense Category",
@@ -35,6 +42,16 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Individual",
+   "read": 1,
+   "write": 1,
+   "create": 1
+  },
+  {
+   "role": "Dependent",
+   "read": 1
   }
  ],
  "row_format": "Dynamic",

@@ -4,20 +4,20 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "telegram_bot_token_password",
-  "openai_api_key_password",
+  "telegram_bot_token",
+  "gemini_api_key",
   "webhook_secret"
  ],
  "fields": [
   {
-   "fieldname": "telegram_bot_token_password",
+   "fieldname": "telegram_bot_token",
    "fieldtype": "Password",
-   "label": "telegram_bot_token "
+   "label": "Telegram Bot Token"
   },
   {
-   "fieldname": "openai_api_key_password",
+   "fieldname": "gemini_api_key",
    "fieldtype": "Password",
-   "label": "gemini_api_key"
+   "label": "Gemini API Key"
   },
   {
    "fieldname": "webhook_secret",
@@ -29,7 +29,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-20 10:36:23.706345",
+ "modified": "2026-11-24 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Expense Manager",
  "name": "Expense Manager Settings",
