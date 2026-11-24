@@ -1,13 +1,13 @@
 <script setup>
 import { computed, onUnmounted, ref, watch } from "vue";
-import { Button, createResource } from "frappe-ui";
+import { Button, dialog } from "frappe-ui";
 import { createAction } from "../api";
 
 const code = ref("");
 const secondsLeft = ref(0);
 let timer;
 
-const status = createResource({ url: "expense_manager.api.get_telegram_status", auto: true });
+const status = createAction({ url: "expense_manager.api.get_telegram_status", auto: true });
 
 const stopCountdown = () => {
   clearInterval(timer);
@@ -35,6 +35,14 @@ const unlink = createAction({
   onSuccess: () => status.reload(),
 });
 
+const confirmUnlink = () =>
+  dialog.danger({
+    title: "Unlink Telegram?",
+    message: "Voice notes from this Telegram account will stop creating expenses until you link it again.",
+    confirmLabel: "Unlink",
+    onConfirm: () => unlink.submit(),
+  });
+
 watch(
   () => status.data?.linked,
   (linked) => linked && stopCountdown(),
@@ -48,7 +56,7 @@ const deepLink = computed(() => `https://t.me/${status.data?.bot}?start=${code.v
 </script>
 
 <template>
-  <section class="space-y-3 rounded-lg border p-4">
+  <section class="space-y-3 rounded-lg border bg-white p-4 shadow-sm">
     <div class="flex items-center justify-between">
       <div>
         <h2 class="text-sm font-semibold text-gray-700">Telegram account</h2>
@@ -56,9 +64,7 @@ const deepLink = computed(() => `https://t.me/${status.data?.bot}?start=${code.v
           {{ status.data.linked ? "Your Telegram account is linked." : "No Telegram account is linked." }}
         </p>
       </div>
-      <Button v-if="status.data?.linked" variant="subtle" theme="red" :loading="unlink.loading" @click="unlink.submit()">
-        Unlink
-      </Button>
+      <Button v-if="status.data?.linked" variant="subtle" theme="red" @click="confirmUnlink">Unlink</Button>
     </div>
 
     <Button v-if="!status.data?.linked && !code" variant="solid" :loading="generate.loading" @click="generate.submit()">
