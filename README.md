@@ -267,6 +267,15 @@ A voice note turned into an expense, with a budget summary in the reply.
 
 ![Telegram voice capture](docs/screenshots/telegram.png)
 
+## Tests
+
+```bash
+bench --site test.localhost set-config allow_tests true
+bench --site test.localhost run-tests --app expense_manager
+```
+
+The tests run on a separate site and roll back after each case. They cover the overspend notification, blocked categories, monthly spend per category, the pocket money balance, a rollover that moves the balance once and a second call that does nothing, an overspent dependent rolling over nothing, isolation between two dependents, an individual seeing their dependents' expenses, and an individual adding a dependent.
+
 ## 9. Known Limitations and Deferred Work
 
 - **Voice only on Telegram:** the bot logs expenses from voice notes. Plain text messages get a reminder to send a voice note, and there are no chat commands such as balance or report yet.
@@ -274,7 +283,6 @@ A voice note turned into an expense, with a budget summary in the reply.
 - **Gemini free tier:** the free quota can return timeouts or 503 errors at busy times. The retries cover most cases, but a failed voice note asks the user to try again.
 - **Ephemeral tunnel in development:** ngrok's free URLs can change on restart, so the webhook must be registered again.
 - **No self-service signup:** accounts are created by an administrator, and dependents are created by an individual from the Dependents page.
-- **No automated tests yet:** logic was verified manually through the console and the running app.
 
 ## License
 
