@@ -225,38 +225,47 @@ Visit `/expense-manager`. Individuals see the dashboard, budgets and dependents 
 ### Dashboard
 Summary cards, overspend banner, quick add, category and person charts, and recent expenses.
 
+![Dashboard](docs/screenshots/dashboard.png)
 
 ### Expenses
 Every expense, newest first, with the person and source. Voice notes appear here within seconds.
 
+![Expenses](docs/screenshots/expenses.png)
 
 ### Categories
 Archive a category instead of deleting it, and restore it later.
 
+![Categories](docs/screenshots/categories.png)
 
 ### Budgets
 Monthly budget per category, shown in red when exceeded.
 
+![Budgets](docs/screenshots/budgets.png)
 
 ### Dependents
 Pocket money allocation, remaining balance, and per-dependent category switches.
 
+![Dependents](docs/screenshots/dependents.png)
 
 ### Reports
 Six month trend, breakdowns by category and person, budget utilisation, and CSV export.
 
+![Reports](docs/screenshots/reports.png)
 
 ### Dependent portal
 What a dependent sees: balance, add expense, recent spending, and rollover to savings.
 
+![Dependent portal](docs/screenshots/portal.png)
 
 ### Telegram account link
 A one-time code generated in the app and sent to the bot as `/link CODE`.
 
+![Telegram account link](docs/screenshots/telegramcode.png)
 
 ### Telegram voice capture
 A voice note turned into an expense, with a budget summary in the reply.
 
+![Telegram voice capture](docs/screenshots/telegram.png)
 
 ## Tests
 
