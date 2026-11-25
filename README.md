@@ -218,7 +218,7 @@ Visit `/expense-manager`. Individuals see the dashboard, budgets and dependents 
 
 ## 7. Demo Video
 
-**Watch the walkthrough:** _link coming soon_
+**Watch the walkthrough:** [https://your-real-video-link](https://your-real-video-link)
 
 ## 8. Screenshots
 
