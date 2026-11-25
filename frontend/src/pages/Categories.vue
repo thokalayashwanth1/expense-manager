@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { Button, FormControl, createListResource, dialog, toast } from "frappe-ui";
 import { createAction } from "../api";
+import { categoryIcon } from "../categoryIcons";
 
 const newCategory = ref("");
 
@@ -72,7 +73,7 @@ const archive = (row) =>
       <p v-if="categories.data && !active.length" class="text-sm text-gray-500">No active categories.</p>
       <ul class="divide-y">
         <li v-for="row in active" :key="row.name" class="flex items-center justify-between py-2 text-sm">
-          <span>{{ row.name }}</span>
+          <span class="flex items-center gap-2"><span class="text-lg">{{ categoryIcon(row.name) }}</span>{{ row.name }}</span>
           <Button variant="subtle" theme="red" @click="archive(row)">Archive</Button>
         </li>
       </ul>
@@ -82,7 +83,7 @@ const archive = (row) =>
       <h2 class="mb-3 text-sm font-semibold text-gray-700">Archived</h2>
       <ul class="divide-y">
         <li v-for="row in archived" :key="row.name" class="flex items-center justify-between py-2 text-sm">
-          <span class="text-gray-500">{{ row.name }}</span>
+          <span class="flex items-center gap-2 text-gray-500"><span class="text-lg opacity-60">{{ categoryIcon(row.name) }}</span>{{ row.name }}</span>
           <Button variant="subtle" @click="restore(row)">Restore</Button>
         </li>
       </ul>

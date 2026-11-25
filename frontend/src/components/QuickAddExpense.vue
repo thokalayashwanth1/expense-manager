@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
 import { createAction } from "../api";
+import { categoryIcon } from "../categoryIcons";
 
 const show = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["added"]);
@@ -24,7 +25,7 @@ const addExpense = createAction({
 });
 
 const categoryOptions = computed(() =>
-  (categories.data || []).map((name) => ({ label: name, value: name })),
+  (categories.data || []).map((name) => ({ label: `${categoryIcon(name)} ${name}`, value: name })),
 );
 const submit = () => addExpense.submit({ ...form });
 </script>
